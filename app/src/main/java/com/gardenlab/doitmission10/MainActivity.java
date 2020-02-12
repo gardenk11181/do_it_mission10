@@ -11,6 +11,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -35,7 +36,10 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener{
 
     private AppBarConfiguration mAppBarConfiguration;
-    private ViewPager pager;
+    BottomNavigationView bottomNav;
+    Fragment1 fragment1;
+    Fragment2 fragment2;
+    Fragment3 fragment3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,57 +60,55 @@ public class MainActivity extends AppCompatActivity implements  NavigationView.O
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this); // drawer 아이템 선택 리스너 등록
 
+        fragment1 = new Fragment1();
+        fragment2 = new Fragment2();
+        fragment3 = new Fragment3();
 
-        pager = findViewById(R.id.pager);
-        pager.setOffscreenPageLimit(3);
+        getSupportFragmentManager().beginTransaction().add(R.id.container,fragment1).commit(); // fragment 등록 및 추가
 
-        MyPagerAdapter adapter = new MyPagerAdapter(getSupportFragmentManager());
-
-        Fragment1 fragment1 = new Fragment1();
-        Fragment2 fragment2 = new Fragment2();
-        Fragment3 fragment3 = new Fragment3();
-        adapter.addItem(fragment1);
-        adapter.addItem(fragment2);
-        adapter.addItem(fragment3);
-
-        pager.setAdapter(adapter);
-
-
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav); // 추후에 pager와 연동
+        setBottomNavListener();
 
     }
 
-    class MyPagerAdapter extends FragmentStatePagerAdapter {
-        ArrayList<Fragment> fragments = new ArrayList<>();
-
-        public MyPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return fragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
-
-        public void addItem(Fragment fragment){
-            fragments.add(fragment);
-        }
-
+    public void setBottomNavListener() {
+        bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                switch(menuItem.getItemId()) {
+                    case R.id.tab1:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment1).commit();
+                        return true;
+                    case R.id.tab2:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment2).commit();
+                        return true;
+                    case R.id.tab3:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment3).commit();
+                        return true;
+                }
+                return true;
+            }
+        });
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
+        bottomNav = findViewById(R.id.bottom_nav);
 
-//        switch (id){
-//            case R.id.menu1:
-//
-//        }
-        return false;
+        if (id == R.id.menu1) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment1).commit();
+            bottomNav.setSelectedItemId(R.id.tab1);
+        } else if(id == R.id.menu2) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment2).commit();
+            bottomNav.setSelectedItemId(R.id.tab2);
+        } else if(id == R.id.menu3) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment3).commit();
+            bottomNav.setSelectedItemId(R.id.tab3);
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
